@@ -5,6 +5,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./hardware/graphics.nix
     ./users.nix
   ];
 
@@ -91,27 +92,9 @@
     powerOnBoot = true;
   };
 
-  # ========== 显卡：RTX 5080 ==========
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # Steam/32 位游戏需要
-  };
-  hardware.nvidia = {
-    modesetting.enable = true;
-    open = true; # 50 系只能用 open kernel modules
-    nvidiaSettings = true;
-    # 如遇驱动问题可指定更新的版本：
-    # package = config.boot.kernelPackages.nvidiaPackages.latest;
-  };
-
   # ========== 游戏 ==========
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true;
-    dedicatedServer.openFirewall = true;
-    localNetworkGameTransfers.openFirewall = true;
-  };
+  # steam 本体已在用户配置（home/default.nix 的 programs.steam）启用；
+  # 这里只留系统级部分：手柄等硬件的 udev 规则 + gamemode
   hardware.steam-hardware.enable = true;
   programs.gamemode.enable = true;
 

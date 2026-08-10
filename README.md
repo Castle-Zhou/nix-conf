@@ -10,10 +10,11 @@ niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + c
 ```
 ~/nix-conf/                   # 仓库即活配置（git 仓库）
 ├── flake.nix                     # nixpkgs 26.05 + home-manager release-26.05
-├── configuration.nix             # 系统配置（GRUB 双启 / nvidia / ly 登录管理器 / niri / 字体 / steam）
+├── configuration.nix             # 系统配置（GRUB 双启 / ly 登录管理器 / niri / 字体 / 系统级游戏配置）
 ├── hardware-configuration.nix    # 安装器生成，勿改
+├── hardware/graphics.nix         # 显卡驱动（nvidia/amd/intel/none 一行切换）
 ├── home/                         # home-manager 模块
-│   ├── default.nix               # 入口 + 用户软件 + git
+│   ├── default.nix               # 入口 + 用户软件 + git + steam
 │   ├── shell.nix                 # zsh + powerlevel10k
 │   ├── i18n.nix                  # fcitx5 + rime + catppuccin 主题
 │   ├── niri.nix                  # 桌面配置部署 + waybar/dunst/fuzzel/alacritty/btop 颜色模板
@@ -127,7 +128,8 @@ niri focus-ring / fcitx5 皮肤全部自动切换。剩余手动项：
   属预期行为。想临时手改可以 `home-manager switch` 前先删掉对应符号链接。
 - 登录管理器是 **ly**（TUI，matrix 动画主题），配置在 `configuration.nix` 的
   `services.displayManager.ly.settings`。
-- 5080 若遇驱动问题，`configuration.nix` 里把 nvidia package 改成
+- 显卡驱动在 `hardware/graphics.nix`：换机器改顶部 `graphicsDriver` 一行
+  （nvidia/amd/intel/none）；5080 遇驱动问题可把 nvidia package 改成
   `nvidiaPackages.latest`。
 - `maple-mono` 直接来自 nixpkgs（26.05 里是 v7.9，带 NF-CN/NF-CN-unhinted 等变体），
   升级随频道走，不再自打包。
