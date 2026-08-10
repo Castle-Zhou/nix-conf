@@ -100,7 +100,4 @@ in
   ];
 
   home.stateVersion = "26.05";
-
-  # Steam（用户级安装；steam-hardware udev 规则 / gamemode 仍在系统配置）
-  programs.steam.enable = true;
 }

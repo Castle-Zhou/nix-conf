@@ -12,5 +12,7 @@
     isNormalUser = true;
     shell = pkgs.zsh;
     extraGroups = [ "networkmanager" "wheel" "video" ];
+    # 用户级软件（装到用户环境，不走 home-manager）
+    packages = [ pkgs.steam ];
   };
 }

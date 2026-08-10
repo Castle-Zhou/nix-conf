@@ -13,8 +13,9 @@ niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + c
 ├── configuration.nix             # 系统配置（GRUB 双启 / ly 登录管理器 / niri / 字体 / 系统级游戏配置）
 ├── hardware-configuration.nix    # 安装器生成，勿改
 ├── hardware/graphics.nix         # 显卡驱动（nvidia/amd/intel/none 一行切换）
+├── users.nix                     # 用户账号 + 用户级软件（steam 等）
 ├── home/                         # home-manager 模块
-│   ├── default.nix               # 入口 + 用户软件 + git + steam
+│   ├── default.nix               # 入口 + 用户软件 + git
 │   ├── shell.nix                 # zsh + powerlevel10k
 │   ├── i18n.nix                  # fcitx5 + rime + catppuccin 主题
 │   ├── niri.nix                  # 桌面配置部署 + waybar/dunst/fuzzel/alacritty/btop 颜色模板
