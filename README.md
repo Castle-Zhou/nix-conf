@@ -2,12 +2,15 @@
 
 niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + clash 代理。
 
+本仓库已纳入 git 管理：flake 打包的是 **git 跟踪的文件**（不是整个目录），
+详见下方「git 与 flake 快照」一节。
+
 ## 目录结构
 
 ```
-~/nix-conf/                   # 仓库即活配置
+~/nix-conf/                   # 仓库即活配置（git 仓库）
 ├── flake.nix                     # nixpkgs 26.05 + home-manager release-26.05
-├── configuration.nix             # 系统配置（GRUB 双启 / nvidia / sddm / niri / 字体 / steam）
+├── configuration.nix             # 系统配置（GRUB 双启 / nvidia / ly 登录管理器 / niri / 字体 / steam）
 ├── hardware-configuration.nix    # 安装器生成，勿改
 ├── home/                         # home-manager 模块
 │   ├── default.nix               # 入口 + 用户软件 + git
@@ -19,23 +22,24 @@ niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + c
 │   ├── lazygit.nix               # lazygit + catppuccin 主题（跟随色板）
 │   └── clash.nix                 # clash 用户服务 + 代理环境变量
 ├── config/                       # ~/.config 的内容（来自 fedora/arch dot-config，已适配台式机）
-│   ├── niri/config.kdl           # 已去掉笔记本配置；显示器块按注释自行启用
+│   ├── niri/config.kdl.template  # 模板（focus-ring/border 颜色由 home/niri.nix 生成）；
+│   │                             # 显示器块按注释自行启用
 │   ├── waybar/                   # config.jsonc + scripts/gpu_stats.sh、bandwidth.sh
 │   │                             # （style.css 由 home/niri.nix 模板生成）
 │   ├── fuzzel/                   # fuzzel.ini.template + scripts/fuzzel-power 电源菜单
 │   ├── dunst/                    # dunstrc.template（颜色占位符，由 niri.nix 替换）
-│   ├── swaylock/config           # catppuccin latte（换风味手动同步）
+│   ├── swaylock/config.template  # catppuccin latte（换风味手动同步）
 │   ├── fcitx5/                   # config + profile + conf/classicui.conf
 │   ├── mpd/mpd.conf、copyq/copyq.conf、Thunar/、nvim/
 ├── rime/                         # rime 输入方案（取自 rime_mac，词库较新）
 └── clash/                        # clash 静态二进制 + config.yaml（端口 7890/7891）
+                                  # —— 被 gitignore（含订阅密钥），见「git 与 flake 快照」
 ```
 
 ## 部署
 
 ```bash
-# 仓库本身即活配置，直接指路径构建（不用拷到 /etc/nixos，
-# flake 路径随意，nix 会把整个目录快照进 store）：
+# 仓库即活配置，直接指路径构建（不用拷到 /etc/nixos，flake 路径随意）：
 sudo nixos-rebuild switch --flake /home/zhouc_yu/nix-conf#nixos
 ```
 
@@ -46,15 +50,55 @@ sudo nixos-rebuild --option experimental-features "nix-command flakes" \
   switch --flake /home/zhouc_yu/nix-conf#nixos
 ```
 
-首次注意：
+### git 与 flake 快照（重要）
+
+本仓库已纳入 git，flake 从 **git 跟踪的文件** 生成快照，而不是复制整个目录：
+
+- **新增文件必须 `git add`**，否则 flake 看不到（rebuild 报 "path does not exist"）。
+- **被 .gitignore 忽略的文件不会进快照**，但 home 模块里引用了它们，git 模式下会报错：
+  - `wallpaper.jpg`（壁纸，964K）——`home/niri.nix` 引用 `../wallpaper.jpg`。
+    解决：`git add -f wallpaper.jpg`（或从 .gitignore 删掉再 add）。
+  - `clash/`（二进制 + geoip + 订阅配置，**故意不跟踪**）——`home/clash.nix` 引用
+    `../clash/`。需要 clash 的话二选一：
+    - `git add -f clash/`：简单，但里面是订阅信息/密钥，**千万别推公共远端**；
+    - 或者放弃 flake 部署 clash（删掉 home/clash.nix 的激活段），机器上手动放一份。
+- 想彻底绕开 git 规则（例如在机器上直接拷目录部署）：删掉目录里的 `.git`，
+  此时 flake 打包整个目录，wallpaper / clash 都会包含。
+
+### nixpkgs 输入是滚动 tarball（lock 会过期）
+
+`flake.nix` 的 nixpkgs / nixpkgs-unstable 指向 USTC 频道的 `nixexprs.tar.xz`，
+内容随频道更新而变。**频道一更新，flake.lock 里的 narHash 就过期了**，rebuild 会报
+`hash mismatch in file downloaded from ...`（或 nix 内部 call-flake.nix 求值错误）。
+rebuild 前先更新这两个 input：
+
+```bash
+sudo nix flake update nixpkgs nixpkgs-unstable
+```
+
+（`nixos-rebuild switch --flake` 不会自动更新 lock。）
+
+### 首次注意
 
 1. 用户 `zhouc_yu` 已手动创建，密码不受 rebuild 影响。
 2. 首次启动 zsh 会进入 p10k configure 向导，配一次即可。
 3. 进 niri 后运行 `niri msg outputs` 看显示器接口名，编辑
-   `~/.config/niri/config.kdl` 里的 `/-output "DP-1"` 块启用/调整。
+   `config/niri/config.kdl.template` 里的 output 块启用/调整（改动后 rebuild 生效）。
 4. nvim 首次启动 lazy.nvim 会自动拉取插件（需网络，代理已在环境变量里）。
-5. 注意：`clash/config.yaml` 里有订阅信息/密钥，flake 会将其复制进全局可读的
-   nix store，介意的话不要把这台机器的 store 共享给别的用户。
+
+## 敏感信息（推远端前过一遍）
+
+仓库里含以下个人信息，推远端前想清楚（至少用私有仓库）：
+
+- `clash/config.yaml`：订阅地址 / 密钥。已在 .gitignore；若按上文 `git add -f clash/`
+  处理，**千万别推公共远端**。另外注意：flake 部署会把 clash 复制进全局可读的
+  nix store，介意的话不要把这台机器的 store 共享给别的用户。
+- `configuration.nix`：SSH 公钥 + 用户名/主机名（`user@macbook`、
+  `user@nixos`）。公钥本身可公开，但暴露了用户名和设备名。
+- `home/default.nix`：git 用户名/邮箱（Zhou Chenyu <zhouc_yu@foxmail.com>）——功能性配置。
+- `rime/wubi.schema.yaml`：词库作者信息（同上邮箱）。
+- `config/copyq/copyq.conf`：copyq 配置（当前不含剪贴板历史）。剪贴板条目会写进该文件，
+  提交前检查是否混入敏感内容；home-manager 部署的是只读符号链接，正常情况下条目写不进去。
 
 ## 主题切换（浅色 latte ⇄ 深色 mocha，frappe/macchiato 备用）
 
@@ -78,12 +122,10 @@ niri focus-ring / fcitx5 皮肤全部自动切换。剩余手动项：
   的只读符号链接，**改配置要改 config/ 里的源文件再 rebuild**；
   程序运行时写这些目录会失败（如 lazy-lock.json 更新、fcitx5-configtool 保存），
   属预期行为。想临时手改可以 `home-manager switch` 前先删掉对应符号链接。
-- 若 SDDM（Wayland 模式）在 nvidia 下出问题：
-  `services.displayManager.sddm.wayland.enable = false;` 退回 X11 模式。
+- 登录管理器是 **ly**（TUI，matrix 动画主题），配置在 `configuration.nix` 的
+  `services.displayManager.ly.settings`。
 - 5080 若遇驱动问题，`configuration.nix` 里把 nvidia package 改成
   `nvidiaPackages.latest`。
 - `maple-mono` 直接来自 nixpkgs（26.05 里是 v7.9，带 NF-CN/NF-CN-unhinted 等变体），
   升级随频道走，不再自打包。
 - 代理默认全局注入（shell + niri 环境）；临时开关用 `proxy-on` / `proxy-off`。
-- flake 会把整个仓库目录复制进 nix store；如果仓库变成 git 仓库，
-  新文件记得 `git add`，否则 flake 看不到。

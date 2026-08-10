@@ -3,8 +3,9 @@
 # 用法：
 #   sudo nixos-rebuild switch --flake /path/to/output#nixos
 #
-# 注意：flake 会把整个 output/ 目录复制进 nix store，
-# 若以后把 output/ 放进了 git 仓库，新文件必须 `git add` 后才会被 flake 看到。
+# 注意：本仓库已纳入 git，flake 只打包 git 跟踪的文件，
+# 新文件必须 `git add` 后才会被 flake 看到；被 .gitignore 忽略的
+# wallpaper.jpg、clash/ 不在快照里，被 home 模块引用时会报错，详见 README。
 
 {
   description = "NixOS on 9800X3D + RTX 5080 (niri, catppuccin, fcitx5-rime, clash)";
