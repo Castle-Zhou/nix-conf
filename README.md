@@ -62,6 +62,8 @@ sudo nixos-rebuild --option experimental-features "nix-command flakes" \
     `~/clash`（clashSlot）同步，目录里只需放 clash 二进制 + Country.mmdb +
     订阅导出的 config.yaml。**slot 不存在时 clash 及代理环境变量/alias 整体不启用**，
     rebuild 不会报错。仓库里的 `clash/` 目录只作临时存放，不入库（gitignore）。
+  - git 身份同 slot 模式：`home/default.nix` 从机器本地 `~/slot/git-identity` 读
+    （两行：第一行姓名、第二行邮箱），文件不存在就不设身份。
 - 想彻底绕开 git 规则（例如在机器上直接拷目录部署）：删掉目录里的 `.git`，
   此时 flake 打包整个目录，wallpaper / clash 都会包含。
 
@@ -95,7 +97,8 @@ sudo nix flake update nixpkgs nixpkgs-unstable
   nix store，介意的话不要把这台机器的 store 共享给别的用户。
 - `configuration.nix`：SSH 公钥 + 用户名/主机名（`user@macbook`、
   `user@nixos`）。公钥本身可公开，但暴露了用户名和设备名。
-- `home/default.nix`：git 用户名/邮箱（Zhou Chenyu <zhouc_yu@foxmail.com>）——功能性配置。
+- **git 身份（姓名/邮箱）**：已改 slot 模式，从机器本地 `~/slot/git-identity`
+  读取（两行：第一行姓名、第二行邮箱），不入库；文件缺失则不设身份。
 - `rime/wubi.schema.yaml`：词库作者信息（同上邮箱）。
 - `config/copyq/copyq.conf`：copyq 配置（当前不含剪贴板历史）。剪贴板条目会写进该文件，
   提交前检查是否混入敏感内容；home-manager 部署的是只读符号链接，正常情况下条目写不进去。

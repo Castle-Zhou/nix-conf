@@ -1,7 +1,14 @@
 # home-manager 入口：导入所有子模块
 
-{ config, pkgs, pkgs-unstable, ... }:
+{ config, pkgs, pkgs-unstable, lib, ... }:
 
+let
+  # git 身份走 slot：机器本地 ~/slot/git-identity（两行：第一行姓名、第二行邮箱），
+  # 不入库。文件不存在就不设身份（git 提交时会提示自行配置）。
+  gitIdentityFile = "/home/zhouc_yu/slot/git-identity";
+  hasGitIdentity = builtins.pathExists gitIdentityFile;
+  gitIdentityLines = lib.splitString "\n" (lib.optionalString hasGitIdentity (builtins.readFile gitIdentityFile));
+in
 {
   imports = [
     ./i18n.nix    # fcitx5 + rime
@@ -17,10 +24,12 @@
 
   programs.git = {
     enable = true;
-    settings.user = {
-      name = "Zhou Chenyu";
-      email = "zhouc_yu@foxmail.com";
-    };
+    settings = if hasGitIdentity then {
+      user = {
+        name = lib.elemAt gitIdentityLines 0;
+        email = lib.elemAt gitIdentityLines 1;
+      };
+    } else { };
   };
 
   # github-cli：git 操作走 https（跟随 http.proxy 代理，无需额外 SSH 代理）
