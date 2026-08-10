@@ -5,6 +5,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./users.nix
   ];
 
   # ========== 引导 ==========
@@ -114,21 +115,6 @@
   hardware.steam-hardware.enable = true;
   programs.gamemode.enable = true;
 
-  # ========== 用户 ==========
-  # 账号已创建且密码已修改，此处只做声明式管理（shell/用户组/ssh 密钥）。
-  # 若以后重装系统，可临时加 initialPassword 或 hashedPassword。
-  users.users.zhouc_yu = {
-    isNormalUser = true;
-    shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" "video" ];
-    openssh.authorizedKeys.keys = [
-      # MacBook Air（重装后从这台风 ssh 进来）
-      "ssh-ed25519 REDACTED user@macbook"
-      # 旧 nixos 的钥匙（私钥若已随旧系统销毁可删）
-      "ssh-ed25519 REDACTED user@nixos"
-    ];
-  };
-
   programs.zsh.enable = true;
   programs.firefox.enable = true;
 
@@ -204,7 +190,7 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = false;
+      PasswordAuthentication = true;
       PermitRootLogin = "no";
     };
     openFirewall = true;

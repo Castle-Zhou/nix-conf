@@ -1,22 +1,32 @@
 # clash 代理
 #
-# clash 目录（二进制 + config.yaml）在 ../clash，
-# 运行时需要可写目录（cache.db、外部 UI 缓存等），
-# 所以激活时 rsync 一份可写副本到 ~/.config/clash。
-# 二进制是静态链接的 linux x86-64 ELF，可直接在 NixOS 上跑。
+# 私人配置（订阅 config.yaml、二进制、geoip 库）不入库，走 slot 模式：
+#   1. 机器上准备一个本地目录（默认 ~/clash，见下面 clashSlot），
+#      放入 clash 二进制、Country.mmdb、订阅导出的 config.yaml；
+#   2. home-manager 激活时把它 rsync 成 ~/.config/clash 的可写副本；
+#   3. slot 目录不存在（机器上没准备 clash）就整体不启用：
+#      不同步、不启动服务、不设代理变量/alias，rebuild 不会报错。
+#
+# 准备方法（机器上执行一次）：
+#   mkdir -p ~/clash
+#   cp clash 二进制 Country.mmdb config.yaml ~/clash/   # 从旧机器/订阅导出
 
 { config, pkgs, lib, ... }:
 
 let
   clashDir = "${config.home.homeDirectory}/.config/clash";
+  # 机器本地 slot（不入库，git/flake 都碰不到）
+  clashSlot = "/home/zhouc_yu/clash";
+  # 求值发生在机器本机（nixos-rebuild 在目标机跑），判断是准的
+  hasClash = builtins.pathExists clashSlot;
 in
-{
+lib.mkIf hasClash {
   home.activation.clash = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     run mkdir -p "${clashDir}"
     run ${pkgs.rsync}/bin/rsync -rlpt --chmod=u+rwX \
       --exclude cache.db \
-      "${../clash}/" "${clashDir}/"
-    run chmod +x "${clashDir}/clash"
+      "${clashSlot}/" "${clashDir}/"
+    run chmod +x "${clashDir}/clash" 2>/dev/null || true
   '';
 
   systemd.user.services.clash = {

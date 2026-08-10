@@ -32,8 +32,8 @@ niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + c
 │   ├── fcitx5/                   # config + profile + conf/classicui.conf
 │   ├── mpd/mpd.conf、copyq/copyq.conf、Thunar/、nvim/
 ├── rime/                         # rime 输入方案（取自 rime_mac，词库较新）
-└── clash/                        # clash 静态二进制 + config.yaml（端口 7890/7891）
-                                  # —— 被 gitignore（含订阅密钥），见「git 与 flake 快照」
+└── clash/                        # 仅临时存放（二进制/geoip/订阅配置，不入库，
+                                  # 机器上真正用的是 ~/clash slot，见 home/clash.nix）
 ```
 
 ## 部署
@@ -58,10 +58,10 @@ sudo nixos-rebuild --option experimental-features "nix-command flakes" \
 - **被 .gitignore 忽略的文件不会进快照**，但 home 模块里引用了它们，git 模式下会报错：
   - `wallpaper.jpg`（壁纸，964K）——`home/niri.nix` 引用 `../wallpaper.jpg`。
     解决：`git add -f wallpaper.jpg`（或从 .gitignore 删掉再 add）。
-  - `clash/`（二进制 + geoip + 订阅配置，**故意不跟踪**）——`home/clash.nix` 引用
-    `../clash/`。需要 clash 的话二选一：
-    - `git add -f clash/`：简单，但里面是订阅信息/密钥，**千万别推公共远端**；
-    - 或者放弃 flake 部署 clash（删掉 home/clash.nix 的激活段），机器上手动放一份。
+  - `clash/`——**已改 slot 模式**，不再从仓库引用：`home/clash.nix` 从机器本地
+    `~/clash`（clashSlot）同步，目录里只需放 clash 二进制 + Country.mmdb +
+    订阅导出的 config.yaml。**slot 不存在时 clash 及代理环境变量/alias 整体不启用**，
+    rebuild 不会报错。仓库里的 `clash/` 目录只作临时存放，不入库（gitignore）。
 - 想彻底绕开 git 规则（例如在机器上直接拷目录部署）：删掉目录里的 `.git`，
   此时 flake 打包整个目录，wallpaper / clash 都会包含。
 
@@ -90,8 +90,8 @@ sudo nix flake update nixpkgs nixpkgs-unstable
 
 仓库里含以下个人信息，推远端前想清楚（至少用私有仓库）：
 
-- `clash/config.yaml`：订阅地址 / 密钥。已在 .gitignore；若按上文 `git add -f clash/`
-  处理，**千万别推公共远端**。另外注意：flake 部署会把 clash 复制进全局可读的
+- `clash/config.yaml`（仓库内临时副本）及机器上 `~/clash` slot 里的订阅地址/密钥：
+  均不入库（gitignore / 仓库外）；注意 flake 部署会把 clash 复制进全局可读的
   nix store，介意的话不要把这台机器的 store 共享给别的用户。
 - `configuration.nix`：SSH 公钥 + 用户名/主机名（`user@macbook`、
   `user@nixos`）。公钥本身可公开，但暴露了用户名和设备名。
