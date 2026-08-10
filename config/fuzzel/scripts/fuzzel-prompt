@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+
+yes=' confirm'
+no=' cancel'
+query='Are you sure?'
+
+while [ $# -ne 0 ]; do
+    case "$1" in
+        -y | --yes)
+            [ -n "$2" ] && yes="$2" || yes=''
+            shift
+            ;;
+
+        -n | --no)
+            [ -n "$2" ] && no="$2" || no=''
+            shift
+            ;;
+
+        -q | --query)
+            [ -n "$2" ] && query="$2"
+            shift
+            ;;
+    esac
+    shift
+done
+
+chosen=$(printf '%s\n%s\n' "$yes" "$no" \
+        | fuzzel -d --select-index 1 -p "$query ")
+
+case "$chosen" in
+    "$yes") exit 0 ;;
+    *)      exit 1 ;;
+esac

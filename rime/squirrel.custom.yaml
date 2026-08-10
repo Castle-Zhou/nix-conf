@@ -1,0 +1,221 @@
+patch:
+  # 通知栏显示方式以及 ascii_mode 应用，与外观无关
+  show_notifications_via_notification_center: true
+
+  # 以下软件默认英文模式
+  app_options:
+    # com.github.GitHubClient:
+    #   ascii_mode: true
+    # com.microsoft.VSCode:
+    #   ascii_mode: true
+    # com.apple.dt.Xcode:
+    #   ascii_mode: true
+    # com.runningwithcrayons.Alfred:
+    #   ascii_mode: true
+    # com.apple.Terminal:
+    #   ascii_mode: true
+    # com.googlecode.iterm2:
+    #   ascii_mode: true
+    # com.apple.finder:
+    #   ascii_mode: true
+    # com.sublimetext.4:
+    #   ascii_mode: true
+    # com.sublimetext.3:
+    #   ascii_mode: true
+    # com.apple.calculator:
+    #   ascii_mode: true
+    # com.apple.launchpad.launcher:
+    #   ascii_mode: true
+    # com.apple.systempreferences:
+    #   ascii_mode: true
+    # com.apple.ActivityMonitor:
+    #   ascii_mode: true
+    # com.apple.keychainaccess:
+    #   ascii_mode: true
+    # com.apple.Spotlight:
+    #   ascii_mode: true
+    # com.jetbrains.intellij:
+    #   ascii_mode: true
+    # com.jetbrains.datagrip:
+    #   ascii_mode: true
+    # com.jetbrains.pycharm:
+    #   ascii_mode: true
+    # io.nteract.nteract:
+    #   ascii_mode: true
+    # com.sequelpro.SequelPro:
+    #   ascii_mode: true
+    # io.termix.client:
+    #   ascii_mode: true
+    # com.agilebits.onepassword7:
+    #   ascii_mode: true
+    # com.agilebits.onepassword7-helper:
+    #   ascii_mode: true
+    # com.kapeli.dashdoc:
+    #   ascii_mode: true
+    # com.svend.uPic:
+    #   ascii_mode: true
+    # com.eusoft.eudic:
+    #   ascii_mode: true
+
+  # 主题外观样式
+  # style:
+  #   color_scheme: poetry_spring                         # 日间主题
+  #   color_scheme_dark: dark_spring                      # 夜间主题
+  #   candidate_list_layout: linear                       # 候选项布局模式，stacked: 堆栈式，linear: 线性式
+  #   text_orientation: horizontal                        # 文字方向，horizontal: 水平，vertical：垂直
+  #   inline_preedit: true                                # 是否启用内联预编辑模式，true 行内模式，false 预编辑模式
+  #   inline_candidate: false                             # 是否将选中的文本嵌入到输入框
+  #   memorize_size: true                                 # 候选框是否紧贴屏幕边缘以减少跳动
+  #   mutual_exclusive: false                             # 透明色是否相互叠加
+  #   translucency: false                                 # 是否使用半透明背景；仅当背景颜色为透明时可用
+  #   corner_radius: 7                                    # 背景框圆角半径值
+  #   hilited_corner_radius: 0                            # 高亮候选项圆角半径值
+  #   border_height: -2                                   # 边框高度值
+  #   border_width: -2                                    # 边框宽度值
+  #   line_spacing: 5                                     # 候选项之间的边距值，当 candidate_list_layout: stacked 时可用
+  #   spacing: 8                                          # 编码区与候选项之间的边距，当 inline_preedit: false 时可用
+  #   shadow_size: 0                                      # 高亮候选项周围的阴影，0 值时表示阴影不生效
+  #   surrounding_extra_expansion: 0                      # 非高亮候选项相对于高亮候选的大小，负数表示缩小，正数表示放大
+  #   candidate_format: '[label] [candidate] [comment]'   # 定义标签、候选及注解的格式
+  #   base_offset: 0                                      # 调整文本位置的偏移量
+  #   font_face: 'Avenir'                                 # 全局文本的字体
+  #   font_point: 18                                      # 全局文本的字号
+  #   label_font_face: 'Avenir'                           # 标签的字体
+  #   label_font_point: 16                                # 标签的字号
+  #   comment_font_face: 'Avenir'                         # 注解的字体
+  #   comment_font_point: 15                              # 注解的字号
+
+  style:
+    status_message_type: mix
+    candidate_format: "[label]. [candidate]"
+    candidate_list_layout: linear
+    text_orientation: horizontal
+    inline_preedit: true
+    inline_candidate: false
+    translucency: true
+    mutual_exclusive: false
+    memorize_size: false
+    showPaging: false
+    alpha: 1e+0
+    corner_radius: 1.25e+1
+    hilited_corner_radius: 1e+1
+    border_height: -3e+0
+    border_width: 0e+0
+    line_spacing: 1e+1
+    spacing: 0e+0
+    base_offset: 5e+0
+    shadow_size: 2e+0
+    font_face: PingFangSC-Regular
+    font_point: 1.6e+1
+    label_font_face: PingFangSC-Light
+    label_font_point: 1.2e+1
+    color_scheme: macos_light
+    color_scheme_dark: macos_dark
+
+  # 主题集合
+  preset_color_schemes:
+    poetry_spring:
+      name: 诗意之春／Poetry Spring
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0x333333                              # 文本色
+      back_color: 0xe3fbe6                              # 背景色
+      label_color: 0x5c5c5c                             # 标签色
+      hilited_text_color: 0x333333                      # 编码文本色
+      candidate_text_color: 0x333333                    # 非高亮候选文本色
+      comment_text_color: 0x5c5c5c                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xFFFFFF           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0x35922a            # 高亮候选背景色
+      hilited_comment_text_color: 0xFFFFFF              # 高亮注解文本色
+
+    dark_spring:
+      name: 春夜阑珊／Dark Spring
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0xFFFFFF                              # 文本色
+      back_color: 0x4b4848                              # 背景色
+      label_color: 0xe0e0e0                             # 标签色
+      hilited_text_color: 0xFFFFFF                      # 编码文本色
+      candidate_text_color: 0xFFFFFF                    # 非高亮候选文本色
+      comment_text_color: 0xe0e0e0                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xe0e0e0           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0x35922a            # 高亮候选背景色
+      hilited_comment_text_color: 0xe0e0e0              # 高亮注解文本色
+
+    poetry_ocean:
+      name: 诗意之海／Poetry Ocean
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0x333333                              # 文本色
+      back_color: 0xFEE6D3                              # 背景色
+      label_color: 0x333333                             # 标签色
+      hilited_text_color: 0x333333                      # 编码文本色
+      candidate_text_color: 0x333333                    # 非高亮候选文本色
+      comment_text_color: 0x333333                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xFFFFFF           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0xB5513F            # 高亮候选背景色
+      hilited_comment_text_color: 0xFFFFFF              # 高亮注解文本色
+
+    dark_ocean:
+      name: 深海无垠／Dark Ocean
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0xFFFFFF                              # 文本色
+      back_color: 0x4b4848                              # 背景色
+      label_color: 0xe0e0e0                             # 标签色
+      hilited_text_color: 0xFFFFFF                      # 编码文本色
+      candidate_text_color: 0xFFFFFF                    # 非高亮候选文本色
+      comment_text_color: 0xe0e0e0                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xe0e0e0           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0xB5513F            # 高亮候选背景色
+      hilited_comment_text_color: 0xe0e0e0              # 高亮注解文本色
+
+    poetry_plum:
+      name: 诗意之梅／Poetry Plum
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0x333333                              # 文本色
+      back_color: 0xF5EEFC                              # 背景色
+      label_color: 0x333333                             # 标签色
+      hilited_text_color: 0x333333                      # 编码文本色
+      candidate_text_color: 0x333333                    # 非高亮候选文本色
+      comment_text_color: 0x333333                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xFFFFFF           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0x4926bb            # 高亮候选背景色
+      hilited_comment_text_color: 0xFFFFFF              # 高亮注解文本色
+
+    dark_plum:
+      name: 夜梅来香／Dark Plum
+      author: 空山明月 <mrshiqiqi@126.com>
+      text_color: 0xFFFFFF                              # 文本色
+      back_color: 0x4b4848                              # 背景色
+      label_color: 0xe0e0e0                             # 标签色
+      hilited_text_color: 0xFFFFFF                      # 编码文本色
+      candidate_text_color: 0xFFFFFF                    # 非高亮候选文本色
+      comment_text_color: 0xe0e0e0                      # 非高亮注解文本色
+      hilited_candidate_label_color: 0xe0e0e0           # 高亮标签色
+      hilited_candidate_text_color: 0xFFFFFF            # 高亮候选文本色
+      hilited_candidate_back_color: 0x4926bb            # 高亮候选背景色
+      hilited_comment_text_color: 0xe0e0e0              # 高亮注解文本色
+
+    macos_light:
+      author: 安静 <qvshuo@foxmail.com>
+      color_space: display_p3
+      back_color: "0xB0FFFFFF"
+      hilited_candidate_back_color: "0xF99563"
+      text_color: "0xFFFFFF"
+      candidate_text_color: "0x000000"
+      hilited_candidate_text_color: "0xFFFFFF"
+      label_color: "0x80000000"
+      hilited_candidate_label_color: "0xFFFFFF"
+
+    macos_dark:
+      author: 安静 <qvshuo@foxmail.com>
+      color_space: display_p3
+      back_color: "0x26000000"
+      hilited_candidate_back_color: "0xFDDFD0"
+      text_color: "0xFFFFFF"
+      candidate_text_color: "0xE6FFFFFF"
+      hilited_candidate_text_color: "0x000000"
+      label_color: "0x80FFFFFF"
+      hilited_candidate_label_color: "0x000000"

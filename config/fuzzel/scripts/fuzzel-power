@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# waybar custom/power：fuzzel 电源菜单
+choice=$(printf "  Lock\n  Suspend\n  Logout\n  Reboot\n  Shutdown\n" | fuzzel --dmenu --prompt "⏻ " --lines 5)
+
+case "$choice" in
+  *Lock*)     swaylock -f ;;
+  *Suspend*)  systemctl suspend ;;
+  *Logout*)   niri msg action quit ;;
+  *Reboot*)   systemctl reboot ;;
+  *Shutdown*) systemctl poweroff ;;
+esac

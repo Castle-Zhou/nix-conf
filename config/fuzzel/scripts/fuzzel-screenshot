@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+screen=' screen'
+area=' area'
+window=' window'
+
+chosen=$(printf '%s\n%s\n%s\n' "$screen" "$area" "$window" \
+    | fuzzel -d --select-index 1 -p "Screen shot ❯   ")
+
+case "$chosen" in
+    "$screen") niri msg action screenshot-screen ;;
+    "$area")   niri msg action screenshot ;;
+    "$window") niri msg action screenshot-window ;;
+    *)         exit 1 ;;
+esac
+

@@ -1,0 +1,46 @@
+customization:
+  distribution_code_name: Weasel
+  distribution_version: 0.16.3
+  generator: "Rime::SwitcherSettings"
+  modified_time: "Thu Feb  6 19:33:05 2025"
+  rime_version: 1.11.2
+patch:
+  ascii_composer:
+    good_old_caps_lock: true
+    switch_key: {Caps_Lock: noop, Control_L: commit_code, Control_R: commit_code, Shift_L: noop, Shift_R: noop}
+  "key_binder/bindings":
+    - {accept: minus, send: Page_Up, when: has_menu}
+    - {accept: equal, send: Page_Down, when: has_menu}
+    - {accept: comma, send: comma, when: always}
+    - {accept: period, send: period, when: always}
+  # "menu/alternative_select_labels":
+  #   - "㊀"
+  #   - "㊁"
+  #   - "㊂"
+  #   - "㊃"
+  #   - "㊄"
+  #   - "㊅"
+  #   - "㊆"
+  #   - "㊇"
+  #   - "㊈"
+  #   - "㊉"
+  "menu/alternative_select_labels":
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+    - "7"
+    - "8"
+    - "9"
+    - "10"
+  "menu/page_size": 7
+  punctuator:
+    full_shape: {" ": {commit: "　"}, "!": {commit: "！"}, "\"": {pair: ["“", "”"]}, "#": ["＃", "⌘"], "$": ["￥", "$", "€", "£", "¥", "¢", "¤"], "%": ["％", "°", "℃"], "&": "＆", "'": {pair: ["‘", "’"]}, "(": "（", ")": "）", "*": ["＊", "·", "・", "×", "※", "❂"], "+": "＋", ",": {commit: "，"}, "-": "－", .: {commit: "。"}, "/": ["／", "÷"], ":": {commit: "："}, ";": {commit: "；"}, "<": ["《", "〈", "«", "‹"], "=": "＝", ">": ["》", "〉", "»", "›"], "?": {commit: "？"}, "@": ["＠", "☯"], "[": ["「", "【", "〔", "［"], "\\": ["、", "＼"], "]": ["」", "】", "〕", "］"], "^": {commit: "……"}, _: "——", "`": "｀", "{": ["『", "〖", "｛"], "|": ["·", "｜", "§", "¦"], "}": ["』", "〗", "｝"], "~": "～"}
+    half_shape: {"!": "！", "\"": {pair: ["“", "”"]}, "#": "#", "$": "¥", "%": "%", "&": "&", "'": {pair: ["‘", "’"]}, "(": "（", ")": "）", "*": "*", "+": "+", ",": "，", "-": "-", .: "。", "/": "、", ":": "：", ";": "；", "<": "《", "=": "=", ">": "》", "?": "？", "@": "@", "[": "【", "\\": "、", "]": "】", "^": "……", _: "——", "`": "·", "{": "「", "|": "|", "}": "」", "~": "~"}
+  schema_list:
+    - {schema: wubi}
+  switcher:
+    caption: "〔方案选单〕"
+    hotkeys: ["Control+grave"]

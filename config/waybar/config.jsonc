@@ -1,0 +1,121 @@
+{
+  "layer": "bottom",
+  "position": "top",
+  "height": 40,
+  "spacing": 2,
+  "exclusive": true,
+  "gtk-layer-shell": true,
+  "passthrough": false,
+  "fixed-center": true,
+  "modules-left": [
+    "custom/logo",
+    "cpu",
+    "custom/gpu",
+    "memory",
+    "temperature",
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "mpd",
+    "custom/bandwidth",
+    "pulseaudio",
+    "tray",
+    "custom/power",
+  ],
+  "mpd": {
+    "format": "{stateIcon} {artist} - {title}",
+    "format-disconnected": "mpd is off",
+    "unknown-tag": "N/A",
+    "interval": 1,
+    "max-length": 40,
+    "on-click": "alacritty -e ncmpcpp",
+    "on-click-right" : "ymuse",
+    "random-icons": {
+      "on": " "
+    },
+    "repeat-icons": {
+      "on": " "
+    },
+    "state-icons": {
+      "paused": "",
+      "playing": ""
+    },
+    "tooltip-format": "{stateIcon} {randomIcon}{repeatIcon} {artist} - {album} - {title} ({elapsedTime:%M:%S} / {totalTime:%M:%S}) ",
+    "tooltip-format-disconnected": "MPD disconnected"
+  },
+  "tray": {
+    "show-passive-items": true,
+    "spacing": 10,
+  },
+  "clock": {
+    "format": "{:%H:%M:%S}",
+    "format-alt": "{:%H:%M:%S |  %Y-%m-%d %a.}",
+    // 左键点击切换 format / format-alt（waybar 原生 format-alt-click）
+    "format-alt-click": 1,
+    "interval": 1,
+    "calendar": {
+      "format": {
+        // 颜色不写死，统一继承 tooltip 的文字色（style.css 随 flavor 走）
+        "days": "<span weight='normal'>{}</span>",
+        "months": "<b>{}</b>",
+        "today": "<span weight='700'><u>{}</u></span>",
+        "weekdays": "<b>{}</b>",
+        "weeks": "<b>W{}</b>",
+      },
+      "mode": "month",
+      "mode-mon-col": 1,
+      "on-scroll": 1,
+    },
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+  },
+  "cpu": {
+    "format": " {usage:2}%",
+    "tooltip": true,
+    "interval": 1,
+  },
+  "custom/gpu": {
+    "format": "󰢮 {}%",
+    "exec": "~/.config/waybar/scripts/gpu_stats.sh",
+    "interval": 2,
+  },
+  "memory": {
+    "format": " {used:0.1f}G",
+  },
+  "temperature": {
+    "thermal-zone": 0,
+    "hwmon-path": "/sys/class/thermal/thermal_zone0/temp",
+    "format": "{icon} {temperatureC}°C",
+    "format-critical": "{icon} {temperatureC}°C",
+    "format-icons": ["", "", "", ""],
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "  muted",
+    "format-icons": {
+      "headphone": "",
+      "default": [" ", " ", " "],
+    },
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    "smooth-scrolling-threshold": 1,
+  },
+  "custom/logo": {
+    "tooltip": false,
+    "on-click": "niri msg action toggle-overview",
+    "format": "󱄅",
+  },
+  "custom/bandwidth": {
+    "exec": "~/.config/waybar/scripts/bandwidth.sh -t 1 enp8s0 wlp7s0",
+    "interval": 1,
+    "format": "{}",
+  },
+  "custom/power": {
+    "tooltip": false,
+    "on-click": "~/.config/fuzzel/scripts/fuzzel-power",
+    "format": "⏻",
+  },
+}

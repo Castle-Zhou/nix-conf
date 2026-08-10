@@ -1,0 +1,258 @@
+# ~/.config/dunst/dunstrc
+
+[global]
+### Display ###
+
+# 显示器（留空则在焦点显示器显示）
+monitor = 0
+
+# 跟随鼠标/键盘/无
+follow = mouse
+
+### Geometry ###
+
+# 动态宽度从 300-500
+width = (300, 500)
+
+# 高度
+height = (50, 300)
+
+# 距离屏幕边缘的偏移 (x, y)
+offset = (15, 15)
+
+# 通知位置
+# top-left, top-center, top-right
+# center-left, center, center-right
+# bottom-left, bottom-center, bottom-right
+origin = top-right
+
+# 缩放比例
+scale = 1
+
+# 通知的最大数量
+notification_limit = 5
+
+### Progress bar ###
+
+# 进度条高度（像素）
+progress_bar_height = 10
+
+# 进度条边框宽度
+progress_bar_frame_width = 1
+
+# 进度条最小/最大宽度
+progress_bar_min_width = 150
+progress_bar_max_width = 300
+
+### Text ###
+
+# 字体
+font = Maple Mono NF CN
+
+# 行间距
+line_height = 0
+
+# 标记（支持 HTML 标签）
+markup = full
+
+# 文本格式
+# %a  appname
+# %s  summary
+# %b  body
+# %i  iconname (including its path)
+# %I  iconname (without its path)
+# %p  progress value ([ 0%] to [100%])
+# %n  progress value without % sign
+# %%  Literal %
+format = "<b>%s</b>\n%b"
+
+# 文本对齐
+alignment = left
+
+# 垂直对齐
+vertical_alignment = center
+
+# 显示年龄（距离发送的时间）
+show_age_threshold = 60
+
+# 分割通知到多行
+word_wrap = yes
+
+# 忽略换行符
+ignore_newline = no
+
+# 堆叠重复通知
+stack_duplicates = true
+
+# 隐藏重复通知的数量
+hide_duplicate_count = false
+
+# 显示通知数量指示器
+show_indicators = yes
+
+### Icons ###
+
+# 启用图标
+enable_recursive_icon_lookup = true
+icon_theme = Papirus
+
+# 图标位置
+icon_position = left
+
+# 图标最小/最大尺寸
+min_icon_size = 32
+max_icon_size = 64
+
+# 图标路径（多个路径用 : 分隔）
+# NixOS: Papirus 由 home-manager 装在 per-user profile
+icon_path = /etc/profiles/per-user/zhouc_yu/share/icons/Papirus-Dark/16x16/status/:/etc/profiles/per-user/zhouc_yu/share/icons/Papirus-Dark/16x16/devices/
+
+### History ###
+
+# 历史长度
+history_length = 20
+
+### Misc/Advanced ###
+
+# dmenu 路径
+dmenu = /usr/bin/wofi -d -p dunst:
+
+# 浏览器
+browser = /usr/bin/xdg-open
+
+# 鼠标操作
+# none: 不操作
+# do_action: 执行默认动作
+# open_url: 打开链接
+# close_current: 关闭当前通知
+# close_all: 关闭所有通知
+# context: 打开上下文菜单
+# context_all: 打开所有通知的上下文菜单
+mouse_left_click = close_current
+mouse_middle_click = do_action, close_current
+mouse_right_click = close_all
+
+# 总是运行规则的脚本
+always_run_script = true
+
+# 标题
+title = Dunst
+
+# 类
+class = Dunst
+
+# 圆角半径
+corner_radius = 10
+
+# 忽略 D-Bus closeNotification 消息
+ignore_dbusclose = false
+
+### Wayland ###
+# 强制 X11 输出
+force_xwayland = false
+
+### Legacy ###
+
+# 启用透明度（需要合成器支持）
+transparency = 10
+
+# 分隔符样式
+separator_height = 2
+
+# 内边距
+padding = 12
+
+# 水平内边距
+horizontal_padding = 12
+
+# 文本图标间距
+text_icon_padding = 0
+
+# 边框宽度
+frame_width = 2
+
+# 分隔符颜色
+separator_color = frame
+
+# 排序（yes/no/update）
+sort = yes
+
+# 空闲时间（秒，0=禁用）
+idle_threshold = 120
+
+frame_color = "@frame@"
+separator_color= frame
+highlight = "@frame@"
+
+[experimental]
+# 每个显示器的 DPI
+per_monitor_dpi = false
+
+
+### 紧急程度：低 ###
+[urgency_low]
+background = "@bg@"
+foreground = "@fg@"
+timeout = 5
+# 图标
+# icon = /path/to/icon
+
+### 紧急程度：正常 ###
+[urgency_normal]
+background = "@bg@"
+foreground = "@fg@"
+timeout = 10
+
+### 紧急程度：高 ###
+[urgency_critical]
+background = "@bg@"
+foreground = "@fg@"
+frame_color = "@frame-critical@"
+timeout = 0
+# 图标
+# icon = /path/to/icon
+
+### 自定义规则示例 ###
+
+# 特定应用的规则
+[spotify]
+appname = Spotify
+timeout = 10
+background = "#1DB954"
+foreground = "#FFFFFF"
+
+[discord]
+appname = discord
+timeout = 0
+background = "#5865F2"
+foreground = "#FFFFFF"
+
+# 电池通知
+[battery_low]
+summary = "*Battery*"
+urgency = critical
+background = "#ED8796"
+foreground = "#24273A"
+
+# 音量通知
+[volume]
+summary = "*olume*"
+timeout = 2
+history_ignore = yes
+
+# 亮度通知
+[brightness]
+summary = "*rightness*"
+timeout = 2
+history_ignore = yes
+
+# 忽略特定通知
+# [ignore]
+# summary = "foobar"
+# skip_display = true
+
+# 脚本执行
+# [script-test]
+# summary = "*test*"
+# script = ~/.config/dunst/test.sh
+

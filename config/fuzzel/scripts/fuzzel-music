@@ -1,0 +1,97 @@
+#!/usr/bin/env sh
+
+status=$(mpc status)
+
+previous=' prev'
+printf '%s\n' "$status" | grep -q 'playing' && play_pause=' pause' || play_pause=' continue '
+stop=' stop'
+next=' next'
+toggle_repeat=' repeat'
+toggle_random=' random'
+row=1
+
+seekb='󰒫 seek backward'
+seekp='󰒬 seek forward'
+
+# Gets the random and repeat status.
+eval "$(printf '%s\n' "$status" \
+    | sed -n -e 's/.*repeat: \([a-z]\+\).*random: \([a-z]\+\).*/repeat=\1 random=\2/p')"
+
+[ "$repeat" = 'on' ] && toggle_repeat="${toggle_repeat}: on" || toggle_repeat="${toggle_repeat}: off"
+[ "$random" = 'on' ] && toggle_random="${toggle_random}: on" || toggle_random="${toggle_random}: off"
+
+while true; do
+  nowvol=$(mpc volume | grep -o '[0-9]*')
+
+  nowvoldisp=
+  if [ $nowvol = 0 ]; then
+    nowvoldisp=
+  elif [ $nowvol -gt 60 ]; then
+    nowvoldisp=
+  elif [ $nowvol -lt 20 ]; then
+    nowvoldisp=
+  fi
+
+  volume_choose="${nowvoldisp} volume choose from ${nowvol}"
+
+  upvol=$(($nowvol + 10))
+  if [ $upvol -gt 100 ]; then
+    upvol=100
+  fi
+
+  downvol=$(($nowvol - 10))
+  if [ $downvol -lt 0 ]; then
+    downvol=0
+  fi
+
+  volume_up="+ volume raise"
+  volume_down="- volume lower"
+
+  if [ $nowvol = 100 ]; then
+    volume_up=" volume max"
+  fi
+
+  if [ $nowvol = 0 ]; then
+    volume_down=" volume min"
+  fi
+
+  current=$(mpc current --format '%artist% - %title%')
+  [ -z "$current" ] && current='-'
+
+  chosen=$(printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n'\
+                  "$previous" "$play_pause" "$stop" "$next" \
+                  "$toggle_repeat" "$toggle_random" \
+                  "$volume_up" "$volume_down" "$volume_choose" \
+                  "$seekb" "$seekp" \
+          | fuzzel -d \
+          -p "${current} ❯   " \
+          --select-index $row)
+
+  case "$chosen" in
+    "$previous")      mpc --quiet prev
+                      break ;;
+    "$play_pause")    mpc --quiet toggle
+                      break ;;
+    "$stop")          mpc --quiet stop
+                      break ;;
+    "$next")          mpc --quiet next
+                      break ;;
+    "$toggle_repeat") mpc --quiet repeat
+                      break ;;
+    "$toggle_random") mpc --quiet random
+                      break ;;
+    "$volume_up")     mpc --quiet volume +10
+                      row=6 ;;
+    "$volume_down")   mpc --quiet volume -10
+                      row=7 ;;
+    "$volume_choose")   mpc --quiet volume $(seq 0 100 | fuzzel -d --select "${nowvol}")
+                      break ;;
+    "$seekb")         mpc --quiet seek -5
+                      row=9 ;;
+    "$seekp")         mpc --quiet seek +5
+                      row=10 ;;
+    *)                exit 1 ;;
+  esac
+
+  mpc --quiet "$action"
+done

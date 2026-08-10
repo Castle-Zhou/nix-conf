@@ -1,0 +1,30 @@
+dpi-aware=no
+icon-theme=Papirus
+width=32
+font=Maple Mono NF CN:weight=bold:size=12
+line-height=24
+fields=name,generic,comment,categories,filename,keywords
+terminal=alacritty -e
+prompt="❯   "
+show-actions=yes
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=@background@
+text=@text@
+prompt=@prompt@
+placeholder=@overlay1@
+input=@text@
+match=@red@
+selection=@selection@
+selection-text=@text@
+selection-match=@red@
+counter=@overlay1@
+border=@red@
+
+[border]
+radius=20
+
+[dmenu]
+exit-immediately-if-empty=yes
+

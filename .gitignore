@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Wallpaper (too large to track)
+wallpaper.jpg
+
+# Clash: binary, geoip db, cache and subscription config (contains secrets)
+clash/
+
+# Rime build artifacts
+rime/build/
+rime/*.userdb/
+rime/*.userdb.txt

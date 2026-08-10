@@ -1,0 +1,23 @@
+# swaylock - Catppuccin Latte
+color=@base@
+inside-color=@base@
+inside-clear-color=@yellow@
+inside-ver-color=@teal@
+inside-wrong-color=@red@
+ring-color=@blue@
+ring-clear-color=@yellow@
+ring-ver-color=@teal@
+ring-wrong-color=@red@
+key-hl-color=@green@
+bs-hl-color=@red@
+text-color=@text@
+text-clear-color=@yellow@
+text-ver-color=@teal@
+text-wrong-color=@red@
+line-color=@base@
+separator-color=@base@
+font=Maple Mono NF CN
+font-size=24
+indicator-radius=100
+indicator-thickness=10
+show-failed-attempts

@@ -1,0 +1,117 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: wubi
+  name: "五笔"
+  version: "0.1"
+  author:
+    - 发明人 王永民先生
+    - 方案制作人 周辰羽 <zhouc_yu@foxmail.com>
+  description: |
+    五笔字型86版
+    码表源自 极点五笔（略有修改）
+    z 键进入拼音反查
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    states: [ 中文, 英文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: extended_charset
+    states: [ 常用, 增广 ]
+  - name: single_char_only
+    reset: 0
+    states: [ 词组, 单字 ]
+  - name: single_char_first
+    reset: 0
+    states: [ 词单混排, 单字优先]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+    - lua_translator@*date_translator
+    - history_translator@repeat_last_input
+    # - lua_translator@*palworld
+  filters:
+    - lua_filter@single_char
+
+speller:
+  max_code_length: 4
+  auto_select: false
+  auto_select_unique_candidate: false
+
+translator:
+  dictionary: wubi
+  enable_charset_filter: true
+  enable_encoder: true
+  enable_sentence: false
+  enable_user_dict: false
+  encode_commit_history: true
+  max_phrase_length: 4
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+  # 关闭候选词提示
+  # comment_format:
+  #   - xform/[a-z]//
+  #   - xform/~//
+  # 关闭逐键提示，即“精准匹配”
+  # enable_completion: false
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "z"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+  bindings:
+    # - {when: has_menu, accept: space, send: space}
+    # - {when: composing, accept: space, send: Escape}
+    # 回车清除编码
+    # - { when: composing, accept: Return, send: Escape }
+    # ;'上屏二三候选项
+    # - { when: has_menu, accept: semicolon, send: 2 }
+    # - { when: has_menu, accept: apostrophe, send: 3 }
+    # ctrl+D 切换单字与词组模式
+    # - {toggle: single_char_only, accept: "Control+Shift+D", when: always}
+    # ctrl+E 切换词单混排与单字优先模式
+    # - {toggle: single_char_first, accept: "Control+Shift+E", when: always}
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: '^/([0-9]0?|[A-Za-z]+)$'
+    reverse_lookup: "^z[a-z]*'?$"
+
+repeat_last_input:
+  input: z
+  size: 1
+  initial_quality: 1
