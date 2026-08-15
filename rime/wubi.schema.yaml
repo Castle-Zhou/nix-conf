@@ -51,7 +51,6 @@ engine:
     - table_translator
     - lua_translator@*date_translator
     - history_translator@repeat_last_input
-    # - lua_translator@*palworld
   filters:
     - lua_filter@single_char
 
