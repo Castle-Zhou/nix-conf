@@ -76,19 +76,15 @@ input {
 // Find more information on the wiki:
 // https://yalter.github.io/niri/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
-// ASUS VG34WQML5A 34寸带鱼屏，HDMI-A-2，原生 3440x1440@240
-// （接口名/模式用 `niri msg outputs` 查）
-output "HDMI-A-2" {
-  mode "3440x1440@239.999"
-  scale 1.0
-  transform "normal"
-
-  // 可变刷新率（游戏时生效）；不想要可注释掉
-  variable-refresh-rate on-demand=true
-
-  // 多显示器时用 position 指定相对位置
-  // position x=0 y=0
-}
+// 显示器配置按机器写进 ~/slot/niri.kdl（本仓库是公开多机配置，不带机器硬件痕迹）。
+// 接口名/模式用 `niri msg outputs` 查。示例（取消注释即生效）：
+// output "HDMI-A-2" {
+//   mode "3440x1440@239.999"
+//   scale 1.0
+//   transform "normal"
+//   variable-refresh-rate on-demand=true
+//   position x=0 y=0
+// }
 
 // Settings that influence how windows are positioned and sized.
 // Find more information on the wiki:
@@ -256,9 +252,9 @@ layout {
 
 spawn-at-startup    "waybar"
 // swayidle 已移除：不做超时锁屏 / 关显示器（系统层面 suspend 也已在 configuration.nix 禁用）
-spawn-sh-at-startup "swaybg -m fill -i /home/zhouc_yu/Pictures/Wallpapers/wallpaper.jpg"
+spawn-sh-at-startup "swaybg -m fill -i @home@/Pictures/Wallpapers/wallpaper.jpg"
 // polkit 认证代理（路径由 home-manager 生成，指向 pkgs.polkit_gnome）
-spawn-at-startup    "/home/zhouc_yu/.local/bin/polkit-agent"
+spawn-at-startup    "@home@/.local/bin/polkit-agent"
 // X11 应用支持（Steam 等），niri 通过 xwayland-satellite 提供 XWayland
 spawn-at-startup    "xwayland-satellite"
 // fcitx5 输入法

@@ -3,7 +3,7 @@
 # waybar style.css / dunst dunstrc / fuzzel fuzzel.ini / alacritty 颜色
 # 均由 home/catppuccin.nix 的 flavor 生成：换主题只改那一行。
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, username, ... }:
 
 let
   palette = import ./catppuccin.nix;
@@ -82,8 +82,8 @@ let
 
   # ---------- dunst dunstrc（模板：占位符换色板色） ----------
   dunstConf = lib.replaceStrings
-    [ "@bg@" "@fg@" "@frame@" "@frame-critical@" ]
-    [ p.base p.text p.blue p.peach ]
+    [ "@bg@" "@fg@" "@frame@" "@frame-critical@" "@username@" ]
+    [ p.base p.text p.blue p.peach username ]
     (builtins.readFile ../config/dunst/dunstrc.template);
 
   # ---------- fuzzel fuzzel.ini（模板：占位符换色板 8 位 hex） ----------
@@ -106,10 +106,24 @@ let
     (builtins.readFile ../config/swaylock/config.template);
 
   # ---------- niri config.kdl（模板：focus-ring/border/overview 颜色跟随 flavor） ----------
-  niriConf = lib.replaceStrings
-    [ "@focus-active@" "@focus-inactive@" "@border-active@" "@border-inactive@" "@border-urgent@" "@overview-bg@" ]
-    [ p.green p.surface1 p.green p.surface1 p.yellow p.surface0 ]
-    (builtins.readFile ../config/niri/config.kdl.template);
+  # 占位符统一替换表：主题色 + 机器相关路径（@home@ / @username@）
+  niriPlaceholders = [ "@focus-active@" "@focus-inactive@" "@border-active@" "@border-inactive@" "@border-urgent@" "@overview-bg@" "@home@" "@username@" ];
+  niriValues = [ p.green p.surface1 p.green p.surface1 p.yellow p.surface0 config.home.homeDirectory username ];
+  replaceNiri = text: lib.replaceStrings niriPlaceholders niriValues text;
+
+  niriConf = replaceNiri (builtins.readFile ../config/niri/config.kdl.template);
+
+  # ---------- 机器 niri patch（~/slot/niri.kdl，机器本地，不存在则跳过） ----------
+  # 与主配置共用同一套占位符（主题色/@home@/@username@ 都会替换）；
+  # 通过 niri 的 include 机制合并（后写覆盖前写、binds 冲突键覆盖、output 追加），
+  # 详见 README「个性化机制」。
+  slotNiriPatch = "${config.home.homeDirectory}/slot/niri.kdl";
+  hasNiriPatch = builtins.pathExists slotNiriPatch;
+  niriMachineConf = lib.optionalString hasNiriPatch (replaceNiri (builtins.readFile slotNiriPatch));
+
+  # ---------- 壁纸：~/slot/wallpaper.jpg 存在则用机器壁纸（激活时复制），否则仓库默认 ----------
+  slotWallpaper = "${config.home.homeDirectory}/slot/wallpaper.jpg";
+  hasSlotWallpaper = builtins.pathExists slotWallpaper;
 
   # ---------- alacritty（颜色整体由 flavor 生成，不再 import 风味文件） ----------
   alacrittyToml = ''
@@ -210,7 +224,9 @@ in
   ];
 
   xdg.configFile = {
-    "niri/config.kdl".text = niriConf;                    # 模板生成，跟随 flavor
+    # 主配置 + 机器 patch 的 include（slot 存在时才追加；niri ≥ 26.04 支持 ~ 展开）
+    "niri/config.kdl".text = niriConf + lib.optionalString hasNiriPatch "\ninclude \"~/.config/niri/niri-machine.kdl\"\n";
+    "niri/niri-machine.kdl" = lib.mkIf hasNiriPatch { text = niriMachineConf; };
     "niri/scripts".source = ../config/niri/scripts;
     "waybar/config.jsonc".source = ../config/waybar/config.jsonc;
     "waybar/scripts".source = ../config/waybar/scripts;
@@ -243,8 +259,11 @@ in
   home.file.".local/bin/polkit-agent".source =
     "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
 
-  # 壁纸（niri config.kdl 里 swaybg 引用）
-  home.file."Pictures/Wallpapers/wallpaper.jpg".source = ../wallpaper.jpg;
+  # 壁纸（niri config.kdl 里 swaybg 引用）：默认用仓库壁纸；
+  # 机器壁纸放 ~/slot/wallpaper.jpg，存在时激活阶段复制覆盖（见下方 activation）
+  home.file."Pictures/Wallpapers/wallpaper.jpg" = lib.mkIf (!hasSlotWallpaper) {
+    source = ../wallpaper.jpg;
+  };
 
   # 常用目录
   home.activation.createDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -254,4 +273,10 @@ in
       "$HOME/Pictures/Wallpapers" \
       "$HOME/bin" "$HOME/.local/bin"
   '';
+
+  # 机器壁纸（slot 存在时复制为可写文件，替代默认壁纸的只读符号链接）
+  home.activation.wallpaper = lib.mkIf hasSlotWallpaper (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p "$HOME/Pictures/Wallpapers"
+    run cp "${slotWallpaper}" "$HOME/Pictures/Wallpapers/wallpaper.jpg"
+  '');
 }

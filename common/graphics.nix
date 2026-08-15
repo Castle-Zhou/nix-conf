@@ -1,7 +1,7 @@
-# 显卡驱动
+# 显卡驱动（多机通用版）
 #
-# 换机器时改下面 graphicsDriver 一行即可：
-#   "nvidia" —— NVIDIA 独显（本机 RTX 5080）
+# 驱动类型由 my.graphicsDriver 决定（machine.nix 里设置）：
+#   "nvidia" —— NVIDIA 独显
 #              注意：50 系必须 open = true；40 系及以前建议 open = false（closed 更稳）
 #   "amd"    —— AMD 核显/独显（内核自带 amdgpu）
 #   "intel"  —— Intel 核显（modesetting，现代推荐）
@@ -13,13 +13,12 @@
 { config, lib, pkgs, ... }:
 
 let
-  graphicsDriver = "nvidia";
   videoDrivers = {
     nvidia = [ "nvidia" ];
     amd = [ "amdgpu" ];
     intel = [ "modesetting" ];
     none = [ "modesetting" ];
-  }.${graphicsDriver};
+  }.${config.my.graphicsDriver};
 in
 {
   # 基础图形（所有驱动通用）
@@ -31,7 +30,7 @@ in
   services.xserver.videoDrivers = videoDrivers;
 
   # NVIDIA 专有配置
-  hardware.nvidia = lib.mkIf (graphicsDriver == "nvidia") {
+  hardware.nvidia = lib.mkIf (config.my.graphicsDriver == "nvidia") {
     modesetting.enable = true;
     open = true; # 50 系只能用 open kernel modules；40 系及以前改 false
     nvidiaSettings = true;

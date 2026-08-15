@@ -105,7 +105,7 @@ max_icon_size = 64
 
 # 图标路径（多个路径用 : 分隔）
 # NixOS: Papirus 由 home-manager 装在 per-user profile
-icon_path = /etc/profiles/per-user/zhouc_yu/share/icons/Papirus-Dark/16x16/status/:/etc/profiles/per-user/zhouc_yu/share/icons/Papirus-Dark/16x16/devices/
+icon_path = /etc/profiles/per-user/@username@/share/icons/Papirus-Dark/16x16/status/:/etc/profiles/per-user/@username@/share/icons/Papirus-Dark/16x16/devices/
 
 ### History ###
 

@@ -1,6 +1,7 @@
 # home-manager 入口：导入所有子模块
+# username 由 machine.nix 通过 home-manager.extraSpecialArgs 注入（见 machine.nix.example）
 
-{ config, pkgs, pkgs-unstable, lib, ... }:
+{ config, pkgs, pkgs-unstable, lib, username, ... }:
 
 let
   # git 身份走 slot：机器本地 ~/slot/git-identity（两行：第一行姓名、第二行邮箱），
@@ -19,8 +20,8 @@ in
     ./clash.nix   # clash 代理
   ];
 
-  home.username = "zhouc_yu";
-  home.homeDirectory = "/home/zhouc_yu";
+  home.username = username;
+  home.homeDirectory = "/home/${username}";
 
   programs.git = {
     enable = true;

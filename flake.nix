@@ -1,14 +1,18 @@
-# 9800X3D + RTX 5080 台式机 / niri + catppuccin
+# 多机通用 NixOS 配置（公开仓库，仓库内零机器痕迹）
 #
 # 用法：
-#   sudo nixos-rebuild switch --flake /path/to/output#nixos
+#   1. cp machine.nix.example machine.nix，按注释填写
+#   2. sudo nixos-generate-config --root / -d .     （生成 hardware-configuration.nix）
+#   3. git add -f machine.nix hardware-configuration.nix   （被 gitignore，必须强制添加）
+#   4. sudo nixos-rebuild switch --flake /path/to/repo#nixos
 #
-# 注意：本仓库已纳入 git，flake 只打包 git 跟踪的文件，
-# 新文件必须 `git add` 后才会被 flake 看到；被 .gitignore 忽略的
-# wallpaper.jpg、clash/ 不在快照里，被 home 模块引用时会报错，详见 README。
+# 个性化分层：
+#   - machine.nix  —— Nix 代码层：身份/引导/内核/显卡/服务开关（每台机器自己写）
+#   - ~/slot/      —— 数据层：clash 订阅、git 身份、niri patch、壁纸等私有文件
+#   详见 README「个性化机制」。
 
 {
-  description = "NixOS on 9800X3D + RTX 5080 (niri, catppuccin, fcitx5-rime, clash)";
+  description = "NixOS configuration: niri + catppuccin, multi-machine ready";
 
   inputs = {
     # USTC 镜像 channel tarball，国内直连，无需代理
@@ -38,6 +42,7 @@
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       modules = [
         ./configuration.nix
+        ./machine.nix   # 机器本地配置（gitignore + git add -f，见 machine.nix.example）
 
         home-manager.nixosModules.home-manager
         {
@@ -45,13 +50,18 @@
           home-manager.useUserPackages = true;
           # 已存在的 ~/.config 文件冲突时备份为 *.hm-bak
           home-manager.backupFileExtension = "hm-bak";
+          # 共享给所有 home 模块的特殊参数（pkgs-unstable；username 由 machine.nix 注入）
           home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
           home-manager.sharedModules = [
             pi-catppuccin.homeManagerModules.default
           ];
-          home-manager.users.zhouc_yu = import ./home/default.nix;
         }
       ];
     };
+
+    # 给高级用户：把本仓库作为模块库嵌入自己的 flake
+    # （需自行提供 machine.nix 等价物与 username 特殊参数，见 README「高级用法」）
+    nixosModules.default = import ./configuration.nix;
+    homeManagerModules.default = import ./home/default.nix;
   };
 }

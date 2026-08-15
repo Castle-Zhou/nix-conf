@@ -1,52 +1,33 @@
-# 系统级配置：9800X3D + RTX 5080，GRUB 双启 Windows，niri 会话
+# 系统级共享配置（机器无关）：桌面/网络/字体/声音/SSH 等通用部分
+# 机器差异（引导/内核/显卡/主机名/服务开关）在 machine.nix 里表达，见 machine.nix.example
 
 { config, lib, pkgs, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix
-    ./hardware/graphics.nix
-    ./users.nix
+    ./common/options.nix    # my.* 机器可调选项
+    ./common/graphics.nix   # 显卡驱动（由 my.graphicsDriver 决定）
+    ./users.nix             # 用户账号（用户名由 my.username 决定）
   ];
 
   # ========== 引导 ==========
-  boot.loader = {
-    grub = {
-      enable = true;
-      device = "nodev";
-      efiSupport = true;
-      extraEntries = ''
-        menuentry "Windows" {
-          search --file --no-floppy --set=root /EFI/Microsoft/Boot/bootmgfw.efi
-          chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
-        }
-      '';
-    };
-    efi = {
-      canTouchEfiVariables = true;
-      efiSysMountPoint = "/boot";
-    };
-  };
-
-  # 使用最新内核（9800X3D + 5080 新硬件受益）；
-  # 若 nvidia 驱动与新内核不兼容（构建时会明确报错），改回默认：
-  # boot.kernelPackages = pkgs.linuxPackages;
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # 引导器（GRUB 双启 Windows / systemd-boot）与内核版本是机器差异，
+  # 在 machine.nix 里配置（见 machine.nix.example），这里不设置用 NixOS 默认。
 
   boot.plymouth.enable = false;
 
   # 睡眠/休眠由系统默认行为管理（niri 里不再有 swayidle 超时触发）
-  # 注意：hibernate 需要 swap ≥ 内存，本机 46G 内存 vs 27G swap，
+  # 注意：hibernate 需要 swap ≥ 内存（内存大的机器要注意），
   # 休眠在内存占用高时会失败；suspend（S3 挂起）不受影响。
 
   # ========== 网络 ==========
   networking = {
-    hostName = "nixos";
+    hostName = config.my.hostName;   # 机器名在 machine.nix 里设置
     networkmanager.enable = true;
   };
 
   # ========== 时区与区域 ==========
-  time.timeZone = "Asia/Shanghai";
+  time.timeZone = "Asia/Shanghai";   # 其他时区可在 machine.nix 里 mkForce 覆盖
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocales = [ "zh_CN.UTF-8/UTF-8" ];
 
@@ -86,17 +67,7 @@
     pulse.enable = true;
   };
 
-  # ========== 蓝牙（手柄/耳机） ==========
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-  };
-
-  # ========== 游戏 ==========
-  # steam 本体已在用户配置（home/default.nix 的 programs.steam）启用；
-  # 这里只留系统级部分：手柄等硬件的 udev 规则 + gamemode
-  hardware.steam-hardware.enable = true;
-  programs.gamemode.enable = true;
+  # 蓝牙 / Steam / gamemode 等按机器需要的服务在 machine.nix 里开启（见 machine.nix.example）
 
   programs.zsh.enable = true;
   programs.firefox.enable = true;

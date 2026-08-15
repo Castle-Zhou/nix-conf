@@ -1,7 +1,11 @@
 # macOS
 .DS_Store
 
-# Wallpaper (too large to track)
+# 机器本地配置：每个使用者自己生成，git add -f 后 flake 才可见（见 README「快速开始」）
+machine.nix
+hardware-configuration.nix
+
+# 壁纸（仓库默认壁纸已入库；个人壁纸放 ~/slot/wallpaper.jpg）
 wallpaper.jpg
 
 # Clash: binary, geoip db, cache and subscription config (contains secrets)

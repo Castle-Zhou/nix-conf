@@ -1,0 +1,75 @@
+# 机器个性化配置（复制为 machine.nix 后按注释填写）
+#
+# 为什么有它：本仓库是公开多机通用配置，仓库内不带任何机器痕迹；
+# 每台机器的差异（身份/引导/内核/显卡/服务开关/home 补丁）都写在这里。
+#
+# 使用步骤：
+#   1. cp machine.nix.example machine.nix，填好下面的 my.* 和机器差异
+#   2. 在目标 NixOS 机器上生成硬件配置（root 执行）：
+#        sudo nixos-generate-config --root / -d /path/to/this/repo
+#      （生成 hardware-configuration.nix 和 configuration.nix，删掉后者）
+#   3. 让 flake 能看到这两个文件（flake 只打包 git 跟踪的文件，而它们被
+#      .gitignore 忽略，必须强制添加；暂存即可，不用提交）：
+#        git add -f machine.nix hardware-configuration.nix
+#      可选（推荐）：git update-index --skip-worktree machine.nix hardware-configuration.nix
+#      （之后 git status 不再显示它们，也防手滑误提交）
+#   4. 部署：
+#        sudo nixos-rebuild switch --flake /path/to/this/repo#nixos
+#
+# 私有数据（clash 订阅、git 身份、niri patch、壁纸）不放这里，放机器本地
+# ~/slot/，见 README「个性化机制」一节。
+
+{ config, lib, pkgs, ... }:
+{
+  imports = [
+    ./hardware-configuration.nix   # nixos-generate-config 生成，见上方步骤 2
+  ];
+
+  # ---------- 身份（必填） ----------
+  my.username = "alice";        # 主用户用户名
+  my.hostName = "nixos";        # 机器名
+
+  # ---------- 显卡驱动 ----------
+  my.graphicsDriver = "none";   # nvidia / amd / intel / none，见 common/graphics.nix
+  # 注意：NVIDIA 50 系必须 open = true（common/graphics.nix 里改）
+
+  # ---------- 引导（每台机器不同；不设置则用 NixOS 默认） ----------
+  # 例 1：GRUB 双启 Windows（台式机）
+  # boot.loader = {
+  #   grub = {
+  #     enable = true;
+  #     device = "nodev";
+  #     efiSupport = true;
+  #     extraEntries = ''
+  #       menuentry "Windows" {
+  #         search --file --no-floppy --set=root /EFI/Microsoft/Boot/bootmgfw.efi
+  #         chainloader (''${root})/EFI/Microsoft/Boot/bootmgfw.efi
+  #       }
+  #     '';
+  #   };
+  #   efi = { canTouchEfiVariables = true; efiSysMountPoint = "/boot"; };
+  # };
+  # 例 2：systemd-boot（笔记本）
+  # boot.loader.systemd-boot.enable = true;
+  # boot.loader.efi.canTouchEfiVariables = true;
+
+  # ---------- 内核 ----------
+  # boot.kernelPackages = pkgs.linuxPackages_latest;   # 新硬件；默认 linuxPackages
+
+  # ---------- 按机器需要的服务/软件（需要哪个开哪个） ----------
+  # hardware.bluetooth.enable = true;      # 蓝牙（手柄/耳机）
+  # hardware.steam-hardware.enable = true; # Steam 手柄等 udev 规则
+  # programs.gamemode.enable = true;
+  # users.users.${config.my.username}.packages = [ pkgs.steam ];
+  # 覆盖共享配置的默认值用 lib.mkForce，例如：
+  # time.timeZone = lib.mkForce "UTC";
+
+  # ---------- home-manager 接线（一般不用改） ----------
+  # 把用户名传给 home 模块（home/default.nix 等需要），并挂载共享 home 模块；
+  # 机器专属 home 模块可以追加进 imports，例如：
+  # home-manager.users.${config.my.username}.imports = [ ./machine-home.nix ];
+  home-manager.extraSpecialArgs.username = config.my.username;
+  home-manager.users.${config.my.username} = {
+    imports = [ ./home/default.nix ];
+  };
+}
