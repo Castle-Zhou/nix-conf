@@ -1,55 +1,114 @@
-# NixOS 配置：9800X3D + RTX 5080
+# NixOS 配置：niri + catppuccin（多机通用，公开仓库）
 
 niri（Wayland）+ 全局 catppuccin（深 mocha / 浅 latte）+ fcitx5-rime + clash 代理。
 
-本仓库已纳入 git 管理：flake 打包的是 **git 跟踪的文件**（不是整个目录），
-详见下方「git 与 flake 快照」一节。
+**仓库内零机器痕迹**：多台机器共用一套配置，每台机器的差异通过
+`machine.nix`（Nix 代码层）和 `~/slot/`（机器本地数据层）表达，见下文「个性化机制」。
+
+## 快速开始
+
+```bash
+# 1. 克隆并准备机器配置
+git clone https://github.com/Castle-Zhou/nix-conf.git && cd nix-conf
+cp machine.nix.example machine.nix        # 按注释填写（用户名/主机名/显卡/引导…）
+
+# 2. 在目标 NixOS 机器上生成硬件配置（root 执行）
+sudo nixos-generate-config --root / -d "$PWD"   # 生成 hardware-configuration.nix 与 configuration.nix
+rm configuration.nix                            # 删掉安装器生成的默认配置，用仓库的
+
+# 3. 让 flake 看到这两个被 gitignore 的文件（flake 只打包 git 跟踪的文件）
+git add -f machine.nix hardware-configuration.nix
+# 可选（推荐）：之后 git status 不再显示它们，也防手滑误提交
+git update-index --skip-worktree machine.nix hardware-configuration.nix
+
+# 4. 部署（首次使用 flake 前需先开 flakes，见下方「首次注意」）
+sudo nixos-rebuild switch --flake "$PWD"#nixos
+```
+
+> `machine.nix` / `hardware-configuration.nix` 是本机文件，**不要提交**
+> （.gitignore 已忽略；`git add -f` 只是让 flake 可见，暂存即可，无需 commit）。
+
+## 个性化机制
+
+仓库是通用的，个性化分两层，都留在仓库外：
+
+### machine.nix —— Nix 代码层（每台机器自己写，不入库）
+
+身份、引导、内核、显卡、服务开关等**结构性差异**：
+
+| 项目 | 写法 |
+| --- | --- |
+| 用户名/主机名 | `my.username = "alice"; my.hostName = "nixos";` |
+| 显卡驱动 | `my.graphicsDriver = "nvidia";`（nvidia/amd/intel/none） |
+| 引导 | GRUB 双启 Windows / systemd-boot，按机器写 `boot.loader.*` |
+| 内核 | `boot.kernelPackages = pkgs.linuxPackages_latest;` |
+| 服务 | 蓝牙 / Steam / gamemode 等按需开启 |
+| 覆盖共享默认值 | `lib.mkForce`（如时区、ly 主题） |
+| home 补丁 | `home-manager.users.${config.my.username}.imports` 追加模块 |
+
+### ~/slot/ —— 数据层（机器本地私有文件，git 完全碰不到）
+
+| 文件 | 作用 | 缺失时行为 |
+| --- | --- | --- |
+| `~/slot/git-identity` | git 姓名/邮箱（两行） | 不设 git 身份 |
+| `~/slot/clash/` | clash 二进制 + Country.mmdb + 订阅 config.yaml | clash 整套（服务/代理/alias）不启用 |
+| `~/slot/niri.kdl` | niri 配置 patch | 用仓库默认 niri 配置 |
+| `~/slot/wallpaper.jpg` | 机器壁纸 | 用仓库默认壁纸 |
+
+### niri 个性化（重点）
+
+niri 25.11+ 支持配置 `include`。主配置末尾会追加
+`include "~/.config/niri/niri-machine.kdl"`（niri ≥ 26.04 支持 `~` 展开），
+该文件由 `~/slot/niri.kdl` 生成，与主配置**共用同一套主题色占位符**。
+
+include 是合并语义：**后写覆盖前写、binds 冲突键覆盖、output/window-rule 追加**，
+所以 slot 文件里可以：
+
+```kdl
+// 例：追加自己的显示器配置（接口名用 `niri msg outputs` 查）
+output "eDP-1" {
+  scale 1.0
+  // ...
+}
+
+// 例：覆盖默认快捷键
+binds {
+  Mod+T { spawn "foot"; }
+}
+```
+
+可用占位符（与主模板同一套）：
+`@focus-active@` `@focus-inactive@` `@border-active@` `@border-inactive@`
+`@border-urgent@` `@overview-bg@` `@home@` `@username@`。
 
 ## 目录结构
 
 ```
-~/nix-conf/                   # 仓库即活配置（git 仓库）
-├── flake.nix                     # nixpkgs 26.05 + home-manager release-26.05
-├── configuration.nix             # 系统配置（GRUB 双启 / ly 登录管理器 / niri / 字体 / 系统级游戏配置）
-├── hardware-configuration.nix    # 安装器生成，勿改
-├── hardware/graphics.nix         # 显卡驱动（nvidia/amd/intel/none 一行切换）
-├── users.nix                     # 用户账号 + 用户级软件（steam 等）
-├── home/                         # home-manager 模块
+nix-conf/
+├── flake.nix                     # 入口：nixosConfigurations.nixos（通用输出）
+├── machine.nix.example           # 机器配置模板（复制为 machine.nix 使用）
+├── configuration.nix             # 共享系统配置（读 config.my.*，无机器痕迹）
+├── common/
+│   ├── options.nix               # my.* 机器可调选项
+│   └── graphics.nix              # 显卡驱动（由 my.graphicsDriver 决定）
+├── users.nix                     # 用户账号（用户名由 my.username 决定）
+├── home/                         # home-manager 共享模块
 │   ├── default.nix               # 入口 + 用户软件 + git
 │   ├── shell.nix                 # zsh + powerlevel10k
 │   ├── i18n.nix                  # fcitx5 + rime + catppuccin 主题
-│   ├── niri.nix                  # 桌面配置部署 + waybar/dunst/fuzzel/alacritty/btop 颜色模板
+│   ├── niri.nix                  # 桌面配置部署（niri/waybar/dunst/fuzzel/…模板）
 │   ├── catppuccin.nix            # 主题单一数据源（flavor + 四套官方色板）
-│   ├── theme.nix                 # 全局 catppuccin（GTK/kvantum/光标/图标）
-│   ├── lazygit.nix               # lazygit + catppuccin 主题（跟随色板）
-│   └── clash.nix                 # clash 用户服务 + 代理环境变量
-├── config/                       # ~/.config 的内容（来自 fedora/arch dot-config，已适配台式机）
-│   ├── niri/config.kdl.template  # 模板（focus-ring/border 颜色由 home/niri.nix 生成）；
-│   │                             # 显示器块按注释自行启用
-│   ├── waybar/                   # config.jsonc + scripts/gpu_stats.sh、bandwidth.sh
-│   │                             # （style.css 由 home/niri.nix 模板生成）
-│   ├── fuzzel/                   # fuzzel.ini.template + scripts/fuzzel-power 电源菜单
-│   ├── dunst/                    # dunstrc.template（颜色占位符，由 niri.nix 替换）
-│   ├── swaylock/config.template  # catppuccin latte（换风味手动同步）
-│   ├── fcitx5/                   # config + profile + conf/classicui.conf
-│   ├── mpd/mpd.conf、copyq/copyq.conf、Thunar/、nvim/
-├── rime/                         # rime 输入方案（取自 rime_mac，词库较新）
-└── clash/                        # 仅临时存放（二进制/geoip/订阅配置，不入库，
-                                  # 机器上真正用的是 ~/slot/clash，见 home/clash.nix）
+│   ├── theme.nix / lazygit.nix / clash.nix
+├── config/                       # ~/.config 的模板/素材（niri/waybar/dunst/…）
+├── rime/                         # rime 输入方案
+└── wallpaper.jpg                 # 默认壁纸（个人壁纸放 ~/slot/wallpaper.jpg）
 ```
 
 ## 部署
 
 ```bash
 # 仓库即活配置，直接指路径构建（不用拷到 /etc/nixos，flake 路径随意）：
-sudo nixos-rebuild switch --flake /home/zhouc_yu/nix-conf#nixos
-```
-
-首次使用 flake 前，如果当前系统还没开过 flakes 特性，先开一下：
-
-```bash
-sudo nixos-rebuild --option experimental-features "nix-command flakes" \
-  switch --flake /home/zhouc_yu/nix-conf#nixos
+sudo nixos-rebuild switch --flake /path/to/nix-conf#nixos
 ```
 
 ### git 与 flake 快照（重要）
@@ -57,17 +116,13 @@ sudo nixos-rebuild --option experimental-features "nix-command flakes" \
 本仓库已纳入 git，flake 从 **git 跟踪的文件** 生成快照，而不是复制整个目录：
 
 - **新增文件必须 `git add`**，否则 flake 看不到（rebuild 报 "path does not exist"）。
-- **被 .gitignore 忽略的文件不会进快照**，但 home 模块里引用了它们，git 模式下会报错：
-  - `wallpaper.jpg`（壁纸，964K）——`home/niri.nix` 引用 `../wallpaper.jpg`。
-    解决：`git add -f wallpaper.jpg`（或从 .gitignore 删掉再 add）。
-  - `clash/`——**已改 slot 模式**，不再从仓库引用：`home/clash.nix` 从机器本地
-    `~/slot/clash`（clashSlot）同步，目录里只需放 clash 二进制 + Country.mmdb +
-    订阅导出的 config.yaml。**slot 不存在时 clash 及代理环境变量/alias 整体不启用**，
-    rebuild 不会报错。仓库里的 `clash/` 目录只作临时存放，不入库（gitignore）。
-  - git 身份同 slot 模式：`home/default.nix` 从机器本地 `~/slot/git-identity` 读
-    （两行：第一行姓名、第二行邮箱），文件不存在就不设身份。
+- **被 .gitignore 忽略的文件不会进快照**，需要入库就得 `git add -f`：
+  - `machine.nix` / `hardware-configuration.nix`：**每个使用者本地生成**，
+    强制添加后 flake 才可见（见「快速开始」）。
+  - `wallpaper.jpg`：仓库默认壁纸已入库；个人壁纸放 `~/slot/wallpaper.jpg`，
+    不要覆盖仓库文件。
 - 想彻底绕开 git 规则（例如在机器上直接拷目录部署）：删掉目录里的 `.git`，
-  此时 flake 打包整个目录，wallpaper / clash 都会包含。
+  此时 flake 打包整个目录。
 
 ### nixpkgs 输入是滚动 tarball（lock 会过期）
 
@@ -84,26 +139,10 @@ sudo nix flake update nixpkgs nixpkgs-unstable
 
 ### 首次注意
 
-1. 用户 `zhouc_yu` 已手动创建，密码不受 rebuild 影响。
+1. 用户需手动创建（或在 machine.nix 里临时加 initialPassword），密码不受 rebuild 影响。
 2. 首次启动 zsh 会进入 p10k configure 向导，配一次即可。
-3. 进 niri 后运行 `niri msg outputs` 看显示器接口名，编辑
-   `config/niri/config.kdl.template` 里的 output 块启用/调整（改动后 rebuild 生效）。
+3. 进 niri 后运行 `niri msg outputs` 看显示器接口名，把显示器块写进 `~/slot/niri.kdl`。
 4. nvim 首次启动 lazy.nvim 会自动拉取插件（需网络，代理已在环境变量里）。
-
-## 敏感信息（推远端前过一遍）
-
-仓库里含以下个人信息，推远端前想清楚（至少用私有仓库）：
-
-- `clash/config.yaml`（仓库内临时副本）及机器上 `~/slot/clash` 里的订阅地址/密钥：
-  均不入库（gitignore / 仓库外）；注意 flake 部署会把 clash 复制进全局可读的
-  nix store，介意的话不要把这台机器的 store 共享给别的用户。
-- `configuration.nix`：SSH 公钥 + 用户名/主机名（`user@macbook`、
-  `user@nixos`）。公钥本身可公开，但暴露了用户名和设备名。
-- **git 身份（姓名/邮箱）**：已改 slot 模式，从机器本地 `~/slot/git-identity`
-  读取（两行：第一行姓名、第二行邮箱），不入库；文件缺失则不设身份。
-- `rime/wubi.schema.yaml`：词库作者信息（同上邮箱）。
-- `config/copyq/copyq.conf`：copyq 配置（当前不含剪贴板历史）。剪贴板条目会写进该文件，
-  提交前检查是否混入敏感内容；home-manager 部署的是只读符号链接，正常情况下条目写不进去。
 
 ## 主题切换（浅色 latte ⇄ 深色 mocha，frappe/macchiato 备用）
 
@@ -113,8 +152,8 @@ niri focus-ring / fcitx5 皮肤全部自动切换。剩余手动项：
 
 | 组件 | 切换方式 |
 | --- | --- |
-| 光标 | `theme.nix` 里 Bibata 主题（只有 Ice/Classic 两色，与 catppuccin 无关） |
-| 壁纸 | 静态图片，不跟随 |
+| 光标 | `home/theme.nix` 里 Bibata 主题（只有 Ice/Classic 两色，与 catppuccin 无关） |
+| 壁纸 | 静态图片，不跟随（`~/slot/wallpaper.jpg`） |
 | fcitx5 皮肤细节 | 圆角半径在 nixpkgs 源包的 `panel.svg`/`highlight.svg` 的 `rx=`；候选字大小在 `config/fcitx5/conf/classicui.conf.template` 的 `Font=` |
 
 ## 已知注意事项
@@ -128,10 +167,29 @@ niri focus-ring / fcitx5 皮肤全部自动切换。剩余手动项：
   程序运行时写这些目录会失败（如 lazy-lock.json 更新、fcitx5-configtool 保存），
   属预期行为。想临时手改可以 `home-manager switch` 前先删掉对应符号链接。
 - 登录管理器是 **ly**（TUI，matrix 动画主题），配置在 `configuration.nix` 的
-  `services.displayManager.ly.settings`。
-- 显卡驱动在 `hardware/graphics.nix`：换机器改顶部 `graphicsDriver` 一行
-  （nvidia/amd/intel/none）；5080 遇驱动问题可把 nvidia package 改成
+  `services.displayManager.ly.settings`（机器想换风格在 machine.nix 里 mkForce）。
+- 显卡驱动在 `common/graphics.nix`：`my.graphicsDriver` 一行切换
+  （nvidia/amd/intel/none）；NVIDIA 遇驱动问题可把 nvidia package 改成
   `nvidiaPackages.latest`。
 - `maple-mono` 直接来自 nixpkgs（26.05 里是 v7.9，带 NF-CN/NF-CN-unhinted 等变体），
   升级随频道走，不再自打包。
 - 代理默认全局注入（shell + niri 环境）；临时开关用 `proxy-on` / `proxy-off`。
+- niri 的机器 patch（include）需要 niri ≥ 25.11；`~` 展开需要 ≥ 26.04
+  （nixos-26.05 频道及以上）。
+
+## 高级用法：作为模块库嵌入自己的 flake
+
+```nix
+# 你的 flake 里
+nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+  modules = [
+    input.nix-conf.nixosModules.default
+    ./hardware-configuration.nix
+    { my.username = "alice"; my.hostName = "myhost"; ... }
+    home-manager.nixosModules.home-manager
+    { home-manager.extraSpecialArgs.username = "alice"; ... }
+  ];
+};
+```
+
+（home-manager 部分同理：`homeManagerModules.default` 需要 `username` 特殊参数。）
