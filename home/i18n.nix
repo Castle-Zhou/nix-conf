@@ -1,6 +1,8 @@
 # fcitx5 + rime 输入法
 #
-# rime 配置来自 ../rime（取自 rime_mac，词库较新），
+# rime 配置默认来自 ../rime（取自 rime_mac，词库较新），
+# 但机器上可以放 ~/slot/rime 整目录替换（不想用默认五笔方案时，
+# 把自己的 rime 配置目录放进去即可，见 README「个性化机制」）。
 # 注意 rime 需要可写目录来编译词典/存用户词频，
 # 所以这里不用 xdg.configFile 符号链接，而是在激活时 rsync 一份可写副本。
 
@@ -8,6 +10,10 @@
 
 let
   palette = import ./catppuccin.nix;
+  # rime 配置源：~/slot/rime 存在则用它，否则用仓库默认（五笔方案）
+  slotRime = "${config.home.homeDirectory}/slot/rime";
+  hasSlotRime = builtins.pathExists slotRime;
+  rimeSource = if hasSlotRime then slotRime else ../rime;
   # fcitx5 皮肤跟随 flavor：浅色用当前风味，深色固定 mocha（最深）；
   # 明暗仍由 UseDarkTheme 跟随系统 color-scheme 自动切换
   classicuiConf = lib.replaceStrings
@@ -49,7 +55,7 @@ in
     "fcitx5/conf/punctuation.conf".source = ../config/fcitx5/conf/punctuation.conf;
   };
 
-  # 把仓库里的 rime 配置同步到 rime 用户数据目录（可写副本）。
+  # 把 rime 配置同步到 rime 用户数据目录（可写副本）。
   # 注意 fcitx5-rime 5.1.x 的用户目录是 ~/.local/share/fcitx5/rime
   # （不是 ~/.config/fcitx5/rime！）
   # 排除 user.yaml / installation.yaml，避免覆盖 rime 运行期产生的用户数据；
@@ -59,6 +65,6 @@ in
     run mkdir -p "$HOME/.local/share/fcitx5/rime"
     run ${pkgs.rsync}/bin/rsync -rl --chmod=u+rwX \
       --exclude user.yaml --exclude installation.yaml \
-      "${../rime}/" "$HOME/.local/share/fcitx5/rime/"
+      "${rimeSource}/" "$HOME/.local/share/fcitx5/rime/"
   '';
 }

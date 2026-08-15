@@ -55,6 +55,8 @@ sudo nixos-rebuild switch --flake "$PWD"#nixos
 | `~/slot/clash/` | clash 二进制 + Country.mmdb + 订阅 config.yaml | clash 整套（服务/代理/alias）不启用 |
 | `~/slot/niri.kdl` | niri 配置 patch | 用仓库默认 niri 配置 |
 | `~/slot/wallpaper.jpg` | 机器壁纸 | 用仓库默认壁纸 |
+| `~/slot/rime/` | 整套 rime 配置（不想用默认五笔时整目录替换） | 用仓库默认五笔方案 |
+| `~/slot/waybar.jsonc` | waybar 配置整文件覆盖（如笔记本加 battery 模块） | 用仓库默认 waybar |
 
 ### niri 个性化（重点）
 

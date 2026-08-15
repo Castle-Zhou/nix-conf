@@ -121,6 +121,10 @@ let
   hasNiriPatch = builtins.pathExists slotNiriPatch;
   niriMachineConf = lib.optionalString hasNiriPatch (replaceNiri (builtins.readFile slotNiriPatch));
 
+  # ---------- 通用 slot 覆盖：~/slot/<name> 存在则整文件替换仓库默认配置 ----------
+  slotFile = name: "${config.home.homeDirectory}/slot/${name}";
+  hasSlotFile = name: builtins.pathExists (slotFile name);
+
   # ---------- 壁纸：~/slot/wallpaper.jpg 存在则用机器壁纸（激活时复制），否则仓库默认 ----------
   slotWallpaper = "${config.home.homeDirectory}/slot/wallpaper.jpg";
   hasSlotWallpaper = builtins.pathExists slotWallpaper;
@@ -228,8 +232,12 @@ in
     "niri/config.kdl".text = niriConf + lib.optionalString hasNiriPatch "\ninclude \"~/.config/niri/niri-machine.kdl\"\n";
     "niri/niri-machine.kdl" = lib.mkIf hasNiriPatch { text = niriMachineConf; };
     "niri/scripts".source = ../config/niri/scripts;
-    "waybar/config.jsonc".source = ../config/waybar/config.jsonc;
     "waybar/scripts".source = ../config/waybar/scripts;
+    # waybar 可被 ~/slot/waybar.jsonc 整文件覆盖（如笔记本加 battery/backlight 模块）；
+    # 有 slot 时不部署仓库默认，改由下方 activation 复制
+    "waybar/config.jsonc" = lib.mkIf (!hasSlotFile "waybar.jsonc") {
+      source = ../config/waybar/config.jsonc;
+    };
     "waybar/style.css".text = waybarStyle;
     "dunst/dunstrc".text = dunstConf;                     # 模板生成，跟随 flavor
     "fuzzel/fuzzel.ini".text = fuzzelConf;                # 模板生成，跟随 flavor
@@ -278,5 +286,11 @@ in
   home.activation.wallpaper = lib.mkIf hasSlotWallpaper (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     run mkdir -p "$HOME/Pictures/Wallpapers"
     run cp "${slotWallpaper}" "$HOME/Pictures/Wallpapers/wallpaper.jpg"
+  '');
+
+  # waybar slot 覆盖（~/slot/waybar.jsonc 存在时复制为可写文件）
+  home.activation.waybarSlot = lib.mkIf (hasSlotFile "waybar.jsonc") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p "$HOME/.config/waybar"
+    run cp "${slotFile "waybar.jsonc"}" "$HOME/.config/waybar/config.jsonc"
   '');
 }
