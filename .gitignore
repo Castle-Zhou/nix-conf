@@ -3,7 +3,17 @@
 
 # 机器本地配置：每个使用者自己生成，git add -f 后 flake 才可见（见 README「快速开始」）
 machine.nix
+machine-home.nix   # 机器级 home 补丁（machine.nix 里 imports 它，可选）
 hardware-configuration.nix
+
+# nix 构建产物
+result
+result-*
+
+# 编辑器/开发工具
+*.swp
+*~
+.direnv/
 
 # 壁纸（仓库默认壁纸已入库；个人壁纸放 ~/slot/wallpaper.jpg）
 wallpaper.jpg

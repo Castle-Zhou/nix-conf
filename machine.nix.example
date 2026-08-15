@@ -5,9 +5,11 @@
 #
 # 使用步骤：
 #   1. cp machine.nix.example machine.nix，填好下面的 my.* 和机器差异
-#   2. 在目标 NixOS 机器上生成硬件配置（root 执行）：
-#        sudo nixos-generate-config --root / -d /path/to/this/repo
-#      （生成 hardware-configuration.nix 和 configuration.nix，删掉后者）
+#   2. 在目标 NixOS 机器上生成硬件配置（root 执行；注意生成到临时目录，
+#      避免覆盖仓库里的 configuration.nix）：
+#        sudo nixos-generate-config --root / -d /tmp/hwgen
+#        cp /tmp/hwgen/hardware-configuration.nix .
+#      （/tmp/hwgen 里还有安装器生成的 configuration.nix，直接忽略）
 #   3. 让 flake 能看到这两个文件（flake 只打包 git 跟踪的文件，而它们被
 #      .gitignore 忽略，必须强制添加；暂存即可，不用提交）：
 #        git add -f machine.nix hardware-configuration.nix

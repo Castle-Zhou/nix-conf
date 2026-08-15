@@ -13,8 +13,9 @@ git clone https://github.com/Castle-Zhou/nix-conf.git && cd nix-conf
 cp machine.nix.example machine.nix        # 按注释填写（用户名/主机名/显卡/引导…）
 
 # 2. 在目标 NixOS 机器上生成硬件配置（root 执行）
-sudo nixos-generate-config --root / -d "$PWD"   # 生成 hardware-configuration.nix 与 configuration.nix
-rm configuration.nix                            # 删掉安装器生成的默认配置，用仓库的
+#    注意：生成到临时目录，避免覆盖仓库里的 configuration.nix！
+sudo nixos-generate-config --root / -d /tmp/hwgen   # 生成 hardware-configuration.nix 与 configuration.nix
+cp /tmp/hwgen/hardware-configuration.nix .          # 只拷硬件配置
 
 # 3. 让 flake 看到这两个被 gitignore 的文件（flake 只打包 git 跟踪的文件）
 git add -f machine.nix hardware-configuration.nix
