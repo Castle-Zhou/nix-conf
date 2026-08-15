@@ -1,22 +1,22 @@
 # clash 代理
 #
 # 私人配置（订阅 config.yaml、二进制、geoip 库）不入库，走 slot 模式：
-#   1. 机器上准备一个本地目录（默认 ~/clash，见下面 clashSlot），
+#   1. 机器上准备一个本地目录（~/slot/clash，见下面 clashSlot），
 #      放入 clash 二进制、Country.mmdb、订阅导出的 config.yaml；
 #   2. home-manager 激活时把它 rsync 成 ~/.config/clash 的可写副本；
 #   3. slot 目录不存在（机器上没准备 clash）就整体不启用：
 #      不同步、不启动服务、不设代理变量/alias，rebuild 不会报错。
 #
 # 准备方法（机器上执行一次）：
-#   mkdir -p ~/clash
-#   cp clash 二进制 Country.mmdb config.yaml ~/clash/   # 从旧机器/订阅导出
+#   mkdir -p ~/slot/clash
+#   cp clash 二进制 Country.mmdb config.yaml ~/slot/clash/   # 从旧机器/订阅导出
 
 { config, pkgs, lib, ... }:
 
 let
   clashDir = "${config.home.homeDirectory}/.config/clash";
-  # 机器本地 slot（不入库，git/flake 都碰不到）
-  clashSlot = "/home/zhouc_yu/clash";
+  # 机器本地 slot（不入库，git/flake 都碰不到），统一放 ~/slot 下
+  clashSlot = "${config.home.homeDirectory}/slot/clash";
   # 求值发生在机器本机（nixos-rebuild 在目标机跑），判断是准的
   hasClash = builtins.pathExists clashSlot;
 in

@@ -5,7 +5,7 @@
 let
   # git 身份走 slot：机器本地 ~/slot/git-identity（两行：第一行姓名、第二行邮箱），
   # 不入库。文件不存在就不设身份（git 提交时会提示自行配置）。
-  gitIdentityFile = "/home/zhouc_yu/slot/git-identity";
+  gitIdentityFile = "${config.home.homeDirectory}/slot/git-identity";
   hasGitIdentity = builtins.pathExists gitIdentityFile;
   gitIdentityLines = lib.splitString "\n" (lib.optionalString hasGitIdentity (builtins.readFile gitIdentityFile));
 in
