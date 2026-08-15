@@ -15,3 +15,6 @@ clash/
 rime/build/
 rime/*.userdb/
 rime/*.userdb.txt
+# Rime 运行时状态（每台机器自己生成，不入库）
+rime/user.yaml
+rime/installation.yaml
